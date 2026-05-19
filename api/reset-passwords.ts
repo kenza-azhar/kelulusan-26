@@ -1,4 +1,4 @@
-import { sql } from './db';
+import { sql } from './db.js';
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
