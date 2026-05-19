@@ -75,8 +75,12 @@ export function LandingPage({ settings }: LandingPageProps) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-white to-blue-50">
-      <nav className="bg-white shadow-sm sticky top-0 z-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-emerald-50 via-white to-green-50 relative overflow-hidden">
+      <div className="pointer-events-none absolute -top-20 -left-20 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl"></div>
+      <div className="pointer-events-none absolute top-40 right-0 h-80 w-80 rounded-full bg-green-200/40 blur-3xl"></div>
+      <div className="pointer-events-none absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-lime-200/30 blur-3xl"></div>
+
+      <nav className="bg-white/80 backdrop-blur shadow-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-center gap-4">
             <img 
@@ -124,7 +128,7 @@ export function LandingPage({ settings }: LandingPageProps) {
             </div>
           ) : (
             <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full">
+              <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 px-4 py-2 rounded-full">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
@@ -133,7 +137,7 @@ export function LandingPage({ settings }: LandingPageProps) {
             </div>
           )}
 
-          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md mx-auto">
+          <div className="bg-white/90 backdrop-blur rounded-2xl shadow-xl p-6 max-w-md mx-auto border border-emerald-100">
             <div className="text-center mb-6">
               <h3 className="text-xl font-bold text-slate-800 mb-1">Cek Kelulusan</h3>
               <p className="text-slate-600 text-sm">Silakan login untuk melihat hasil</p>
