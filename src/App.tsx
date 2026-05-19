@@ -4,6 +4,7 @@ import { LandingPage } from './components/LandingPage';
 import { StudentDashboard } from './components/StudentDashboard';
 import { AdminDashboard } from './components/AdminDashboard';
 import { AuthProvider } from './contexts/AuthContext';
+import { fetchJson } from './utils/api';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -17,10 +18,9 @@ function App() {
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch(`${API_URL}/settings`);
-      const data = await response.json();
-      if (data.success) {
-        setSettings(data.settings);
+      const { data } = await fetchJson(`${API_URL}/settings`);
+      if (data && (data as any).success) {
+        setSettings((data as any).settings);
       }
     } catch (error) {
       console.error('Failed to fetch settings:', error);
