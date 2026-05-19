@@ -56,7 +56,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         alamat,
         kota,
         id_folder_drive,
-        countdown_time
+        countdown_time,
+        theme_color
       } = req.body;
 
       if (!nama_madrasah || !tahun_ajaran || !alamat || !kota || !countdown_time) {
@@ -64,6 +65,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       const existingSettings = await sql`SELECT id FROM settings ORDER BY id DESC LIMIT 1`;
+      const themeValue = theme_color || '#2563eb';
       
       let result;
       if (existingSettings.length > 0) {
@@ -76,6 +78,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             kota = ${kota},
             id_folder_drive = ${id_folder_drive || null},
             countdown_time = ${countdown_time},
+            theme_color = ${themeValue},
             updated_at = CURRENT_TIMESTAMP
           WHERE id = ${existingSettings[0].id}
           RETURNING *
@@ -84,10 +87,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         result = await sql`
           INSERT INTO settings (
             nama_madrasah, tahun_ajaran, logo_madrasah, alamat, kota,
-            id_folder_drive, countdown_time
+            id_folder_drive, countdown_time, theme_color
           ) VALUES (
             ${nama_madrasah}, ${tahun_ajaran}, ${logo_madrasah}, ${alamat}, ${kota},
-            ${id_folder_drive || null}, ${countdown_time}
+            ${id_folder_drive || null}, ${countdown_time}, ${themeValue}
           )
           RETURNING *
         `;
