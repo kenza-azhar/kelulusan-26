@@ -35,7 +35,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(403).json({ error: 'Access denied. Admin only.' });
   }
 
-  const { target, newPassword } = req.body as { target?: 'admin' | 'students'; newPassword?: string };
+  const { target, newPassword, studentId, nisn } = req.body as {
+    target?: 'admin' | 'students' | 'student';
+    newPassword?: string;
+    studentId?: number;
+    nisn?: string;
+  };
 
   if (!target) {
     return res.status(400).json({ error: 'Target is required' });
@@ -59,6 +64,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         UPDATE students
         SET password_hash = ${passwordHash}, updated_at = CURRENT_TIMESTAMP
       `;
+
+      return res.status(200).json({ success: true, message: 'Password semua siswa berhasil direset.' });
+    }
+
+    if (target === 'student') {
+      if (!studentId && !nisn) {
+        return res.status(400).json({ error: 'studentId atau nisn wajib diisi' });
+      }
+
+      const result = studentId
+        ? await sql`
+            UPDATE students
+            SET password_hash = ${passwordHash}, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ${studentId}
+            RETURNING id
+          `
+        : await sql`
+            UPDATE students
+            SET password_hash = ${passwordHash}, updated_at = CURRENT_TIMESTAMP
+            WHERE nisn = ${nisn}
+            RETURNING id
+          `;
+
+      if (result.length === 0) {
+        return res.status(404).json({ error: 'Siswa tidak ditemukan' });
+      }
 
       return res.status(200).json({ success: true, message: 'Password siswa berhasil direset.' });
     }
