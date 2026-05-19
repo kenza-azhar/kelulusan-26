@@ -650,45 +650,78 @@ function DataSiswa() {
           />
           <button
             onClick={handleViewAll}
-            className="bg-slate-100 hover:bg-slate-200 text-slate-800 px-4 py-2 rounded-lg font-medium transition"
+            className="bg-slate-100 hover:bg-slate-200 text-slate-800 p-2 rounded-lg font-medium transition"
+            aria-label="Lihat semua data"
+            title="Lihat semua data"
           >
-            Lihat Semua
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
           </button>
           <button
             onClick={handleExport}
-            className="bg-slate-100 hover:bg-slate-200 text-slate-800 px-4 py-2 rounded-lg font-medium transition"
+            className="bg-slate-100 hover:bg-slate-200 text-slate-800 p-2 rounded-lg font-medium transition"
+            aria-label="Export Excel"
+            title="Export Excel"
           >
-            Export Excel
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v12m0 0l4-4m-4 4l-4-4" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+            </svg>
           </button>
           <button
             onClick={handleDownloadTemplate}
-            className="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2 rounded-lg font-medium transition"
+            className="bg-slate-200 hover:bg-slate-300 text-slate-800 p-2 rounded-lg font-medium transition"
+            aria-label="Template Excel"
+            title="Template Excel"
           >
-            Template Excel
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
           </button>
           <button
             onClick={handleImportClick}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-lg font-medium transition"
+            aria-label="Import Excel"
+            title="Import Excel"
           >
-            Import Excel
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 21V9m0 0l-4 4m4-4l4 4" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7V5a2 2 0 012-2h12a2 2 0 012 2v2" />
+            </svg>
           </button>
           <button
             onClick={handleSaveClick}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded-lg font-medium transition"
+            aria-label="Simpan data"
+            title="Simpan data"
           >
-            Simpan
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h8l4 4v12a2 2 0 01-2 2H7a2 2 0 01-2-2V5z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6M9 9h3" />
+            </svg>
           </button>
           <button
             onClick={handleDeleteAll}
-            className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-medium transition"
+            className="bg-rose-600 hover:bg-rose-700 text-white p-2 rounded-lg font-medium transition"
+            aria-label="Hapus semua data"
+            title="Hapus semua data"
           >
-            Hapus Semua
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3m-9 0h12" />
+            </svg>
           </button>
           <button
             onClick={() => setShowForm(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition"
+            className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg font-medium transition"
+            aria-label="Tambah siswa"
+            title="Tambah siswa"
           >
-            + Tambah Siswa
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
           </button>
         </div>
       </div>
