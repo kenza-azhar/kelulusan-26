@@ -201,7 +201,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(403).json({ error: 'Access denied. Admin only.' });
       }
 
-      const { id } = req.query;
+      const { id, all } = req.query;
+
+      if (all === 'true') {
+        await sql`DELETE FROM students`;
+        return res.status(200).json({
+          success: true,
+          message: 'Semua data siswa berhasil dihapus'
+        });
+      }
 
       if (!id) {
         return res.status(400).json({ error: 'Student ID is required' });
