@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { fetchJson } from '../utils/api';
-
-const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 interface LandingPageProps {
   settings: any;
@@ -14,9 +11,6 @@ export function LandingPage({ settings }: LandingPageProps) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [captcha, setCaptcha] = useState({ question: '', answer: 0 });
-  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
-  const [registerData, setRegisterData] = useState({ nisn: '', nama: '', password: '' });
-  const [registerLoading, setRegisterLoading] = useState(false);
   const [captchaAnswer, setCaptchaAnswer] = useState('');
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [isOpen, setIsOpen] = useState(false);
@@ -73,35 +67,6 @@ export function LandingPage({ settings }: LandingPageProps) {
       alert(error instanceof Error ? error.message : 'Login gagal');
       generateCaptcha();
       setCaptchaAnswer('');
-    }
-  };
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setRegisterLoading(true);
-
-    try {
-      const { data } = await fetchJson(`${API_URL}/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(registerData),
-      });
-
-      if (data && (data as any).success) {
-        alert((data as any).message || 'Pendaftaran berhasil. Silakan login.');
-        setUsername(registerData.nisn);
-        setPassword(registerData.password);
-        setRegisterData({ nisn: '', nama: '', password: '' });
-        setActiveTab('login');
-      } else {
-        alert((data as any)?.error || 'Pendaftaran gagal.');
-      }
-    } catch (error) {
-      alert('Pendaftaran gagal. Silakan coba lagi.');
-    } finally {
-      setRegisterLoading(false);
     }
   };
 
@@ -165,187 +130,105 @@ export function LandingPage({ settings }: LandingPageProps) {
           )}
 
           <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md mx-auto">
-            <div className="flex rounded-xl bg-slate-100 p-1 mb-6">
-              <button
-                type="button"
-                onClick={() => setActiveTab('login')}
-                className={`flex-1 rounded-lg py-2 text-sm font-semibold transition ${
-                  activeTab === 'login'
-                    ? 'bg-white text-slate-800 shadow'
-                    : 'text-slate-500'
-                }`}
-              >
-                Login
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('register')}
-                className={`flex-1 rounded-lg py-2 text-sm font-semibold transition ${
-                  activeTab === 'register'
-                    ? 'bg-white text-slate-800 shadow'
-                    : 'text-slate-500'
-                }`}
-              >
-                Daftar Akun
-              </button>
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-bold text-slate-800 mb-1">Cek Kelulusan</h3>
+              <p className="text-slate-600 text-sm">Silakan login untuk melihat hasil</p>
             </div>
 
-            {activeTab === 'login' ? (
-              <>
-                <div className="text-center mb-6">
-                  <h3 className="text-xl font-bold text-slate-800 mb-1">Cek Kelulusan</h3>
-                  <p className="text-slate-600 text-sm">Silakan login untuk melihat hasil</p>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">NISN / Username Admin</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg className="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Masukkan NISN"
+                    required
+                  />
                 </div>
+              </div>
 
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">NISN / Username Admin</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg className="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                      </div>
-                      <input
-                        type="text"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Masukkan NISN"
-                        required
-                      />
-                    </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Password</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg className="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">Password</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg className="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                      </div>
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full pl-10 pr-10 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Masukkan Password"
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword((prev) => !prev)}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
-                        aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
-                      >
-                        {showPassword ? (
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.956 9.956 0 012.608-4.046M9.88 9.88a3 3 0 104.24 4.24" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6.228 6.228A9.955 9.955 0 0112 5c4.478 0 8.268 2.943 9.543 7a9.99 9.99 0 01-4.132 5.411M3 3l18 18" />
-                          </svg>
-                        ) : (
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">Verifikasi Keamanan</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <span className="text-slate-500 font-bold">{captcha.question}</span>
-                      </div>
-                      <input
-                        type="number"
-                        value={captchaAnswer}
-                        onChange={(e) => setCaptchaAnswer(e.target.value)}
-                        className="w-full pl-20 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Hasil Penjumlahan"
-                        required
-                      />
-                    </div>
-                  </div>
-
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-10 pr-10 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Masukkan Password"
+                    required
+                  />
                   <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2"
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                    aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
                   >
-                    {loading ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Memproses...
-                      </>
+                    {showPassword ? (
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.956 9.956 0 012.608-4.046M9.88 9.88a3 3 0 104.24 4.24" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6.228 6.228A9.955 9.955 0 0112 5c4.478 0 8.268 2.943 9.543 7a9.99 9.99 0 01-4.132 5.411M3 3l18 18" />
+                      </svg>
                     ) : (
-                      <>
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                        </svg>
-                        Masuk Aplikasi
-                      </>
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
                     )}
                   </button>
-                </form>
-              </>
-            ) : (
-              <>
-                <div className="text-center mb-6">
-                  <h3 className="text-xl font-bold text-slate-800 mb-1">Daftar Akun Siswa</h3>
-                  <p className="text-slate-600 text-sm">Isi data untuk membuat akun login</p>
                 </div>
+              </div>
 
-                <form onSubmit={handleRegister} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">NISN</label>
-                    <input
-                      type="text"
-                      value={registerData.nisn}
-                      onChange={(e) => setRegisterData({ ...registerData, nisn: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Masukkan NISN"
-                      required
-                    />
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Verifikasi Keamanan</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span className="text-slate-500 font-bold">{captcha.question}</span>
                   </div>
+                  <input
+                    type="number"
+                    value={captchaAnswer}
+                    onChange={(e) => setCaptchaAnswer(e.target.value)}
+                    className="w-full pl-20 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Hasil Penjumlahan"
+                    required
+                  />
+                </div>
+              </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">Nama Lengkap</label>
-                    <input
-                      type="text"
-                      value={registerData.nama}
-                      onChange={(e) => setRegisterData({ ...registerData, nama: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Masukkan nama lengkap"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">Password</label>
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      value={registerData.password}
-                      onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Buat password"
-                      required
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={registerLoading}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-bold py-2 px-4 rounded-lg transition duration-200"
-                  >
-                    {registerLoading ? 'Memproses...' : 'Daftar Sekarang'}
-                  </button>
-                </form>
-              </>
-            )}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Memproses...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                    </svg>
+                    Masuk Aplikasi
+                  </>
+                )}
+              </button>
+            </form>
           </div>
         </div>
       </main>
