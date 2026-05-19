@@ -19,6 +19,7 @@ interface Settings {
   logo_madrasah: string;
   alamat: string;
   kota: string;
+  countdown_time?: string;
 }
 
 interface StudentDashboardProps {
@@ -28,6 +29,7 @@ interface StudentDashboardProps {
 export function StudentDashboard({ settings }: StudentDashboardProps) {
   const [result, setResult] = useState<StudentResult | null>(null);
   const [loading, setLoading] = useState(true);
+  const [announcementOpen, setAnnouncementOpen] = useState(true);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -37,8 +39,18 @@ export function StudentDashboard({ settings }: StudentDashboardProps) {
       return;
     }
 
+    if (settings?.countdown_time) {
+      const target = new Date(settings.countdown_time);
+      const isOpen = target.getTime() <= new Date().getTime();
+      setAnnouncementOpen(isOpen);
+      if (!isOpen) {
+        setLoading(false);
+        return;
+      }
+    }
+
     fetchStudentData();
-  }, [user]);
+  }, [user, settings]);
 
   const fetchStudentData = async () => {
     const token = localStorage.getItem('token');
@@ -141,6 +153,18 @@ export function StudentDashboard({ settings }: StudentDashboardProps) {
             <div className="text-center">
               <div className="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
               <p className="mt-2 text-slate-600">Memuat data...</p>
+            </div>
+          </div>
+        ) : !announcementOpen ? (
+          <div className="max-w-2xl mx-auto bg-amber-50 border border-amber-200 rounded-lg p-6">
+            <div className="flex items-center gap-3">
+              <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <h3 className="text-lg font-semibold text-amber-800">Mohon Maaf</h3>
+                <p className="text-amber-700">Pengumuman belum dibuka. Silakan cek kembali sesuai jadwal.</p>
+              </div>
             </div>
           </div>
         ) : !result ? (
