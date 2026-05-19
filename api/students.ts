@@ -58,7 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             SELECT id, nisn, nama, status_kelulusan, keterangan, link_pdf, created_at, updated_at
             FROM students
             WHERE nisn ILIKE ${searchTerm} OR nama ILIKE ${searchTerm}
-            ORDER BY nisn ASC
+            ORDER BY nama ASC
             LIMIT ${parseInt(limit as string)} OFFSET ${offset}
           `;
           
@@ -72,7 +72,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           students = await sql`
             SELECT id, nisn, nama, status_kelulusan, keterangan, link_pdf, created_at, updated_at
             FROM students
-            ORDER BY nisn ASC
+            ORDER BY nama ASC
             LIMIT ${parseInt(limit as string)} OFFSET ${offset}
           `;
           
