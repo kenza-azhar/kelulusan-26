@@ -29,8 +29,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const savedToken = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
-    
+    const demoEnabled =
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      window.location.search.includes('demo=1') ||
+      localStorage.getItem('demoMode') === 'true';
+
     if (savedToken && savedUser) {
+      if (savedToken === 'demo-token' && !demoEnabled) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        return;
+      }
+
       setToken(savedToken);
       setUser(JSON.parse(savedUser));
     }
@@ -78,27 +89,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       throw new Error(data.error || 'Login failed');
     } catch (error) {
-      const isDemoAdmin = username === 'admin' && password === 'Min1ciamis!';
-      const demoStudents = JSON.parse(localStorage.getItem('demoStudents') || '[]') as Array<{ nisn: string; nama: string }>;
-      const demoPasswords = JSON.parse(localStorage.getItem('demoStudentPasswords') || '{}') as Record<string, string>;
-      const demoStudent = demoStudents.find((student) => student.nisn === username);
-      const demoPassword = demoPasswords[username] || 'Min1ciamis!';
-      const isDemoStudent = Boolean(demoStudent) && password === demoPassword;
+      const demoEnabled =
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1' ||
+        window.location.search.includes('demo=1') ||
+        localStorage.getItem('demoMode') === 'true';
 
-      if (isDemoAdmin) {
-        setSession(
-          { id: 1, username: 'admin', fullname: 'Super Admin', role: 'Super Admin' },
-          'demo-token'
-        );
-        return true;
-      }
+      if (demoEnabled) {
+        const isDemoAdmin = username === 'admin' && password === 'Min1ciamis!';
+        const demoStudents = JSON.parse(localStorage.getItem('demoStudents') || '[]') as Array<{ nisn: string; nama: string }>;
+        const demoPasswords = JSON.parse(localStorage.getItem('demoStudentPasswords') || '{}') as Record<string, string>;
+        const demoStudent = demoStudents.find((student) => student.nisn === username);
+        const demoPassword = demoPasswords[username] || 'Min1ciamis!';
+        const isDemoStudent = Boolean(demoStudent) && password === demoPassword;
 
-      if (isDemoStudent && demoStudent) {
-        setSession(
-          { id: 2, username: demoStudent.nisn, fullname: demoStudent.nama, role: 'Siswa' },
-          'demo-token'
-        );
-        return true;
+        if (isDemoAdmin) {
+          setSession(
+            { id: 1, username: 'admin', fullname: 'Super Admin', role: 'Super Admin' },
+            'demo-token'
+          );
+          return true;
+        }
+
+        if (isDemoStudent && demoStudent) {
+          setSession(
+            { id: 2, username: demoStudent.nisn, fullname: demoStudent.nama, role: 'Siswa' },
+            'demo-token'
+          );
+          return true;
+        }
       }
 
       console.error('Login error:', error);
