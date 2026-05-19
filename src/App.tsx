@@ -45,7 +45,12 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+        <div
+          className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50"
+          style={{
+            '--theme-color': settings?.theme_color || '#2563eb'
+          } as React.CSSProperties}
+        >
           <Routes>
             <Route path="/" element={<LandingPage settings={settings} />} />
             <Route path="/student" element={<StudentDashboard settings={settings} />} />
