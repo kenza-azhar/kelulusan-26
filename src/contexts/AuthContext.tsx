@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { fetchJson } from '../utils/api';
 
 interface User {
   id: number;
@@ -63,31 +64,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (username: string, password: string): Promise<boolean> => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/auth`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
+      const attemptLogin = async () => {
+        const result = await fetchJson(`${API_URL}/auth`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, password }),
+        });
 
-      const data = await response.json();
+        return result;
+      };
 
-      if (data.success) {
+      let { response, data, text } = await attemptLogin();
+
+      if (!response.ok) {
+        if (response.status === 404 || response.status === 500) {
+          await fetchJson(`${API_URL}/init`, { method: 'POST' });
+          const retry = await attemptLogin();
+          response = retry.response;
+          data = retry.data;
+          text = retry.text;
+        }
+      }
+
+      if (!response.ok) {
+        const message = (data as any)?.error || (data as any)?.message || text || `Login gagal (status ${response.status}).`;
+        throw new Error(message || 'Login failed');
+      }
+
+      if (data && (data as any).success) {
         setSession(
           {
-            id: data.user.id,
-            username: data.user.username,
-            fullname: data.user.fullname,
-            role: data.user.role as User['role']
+            id: (data as any).user.id,
+            username: (data as any).user.username,
+            fullname: (data as any).user.fullname,
+            role: (data as any).user.role as User['role']
           },
-          data.token
+          (data as any).token
         );
 
         return true;
       }
 
-      throw new Error(data.error || 'Login failed');
+      throw new Error((data as any)?.error || 'Login failed');
     } catch (error) {
       const demoEnabled =
         window.location.hostname === 'localhost' ||
