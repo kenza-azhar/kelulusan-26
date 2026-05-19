@@ -61,8 +61,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       } = req.body;
 
       if (!nama_madrasah || !tahun_ajaran || !alamat || !kota || !countdown_time) {
-        return res.status(400).json({ error: 'Missing required fields' });
+        return res.status(400).json({ error: 'Semua field wajib diisi.' });
       }
+
+      await sql`
+        ALTER TABLE settings
+        ADD COLUMN IF NOT EXISTS theme_color VARCHAR(20) NOT NULL DEFAULT '#2563eb'
+      `;
 
       const existingSettings = await sql`SELECT id FROM settings ORDER BY id DESC LIMIT 1`;
       const themeValue = theme_color || '#2563eb';
@@ -105,6 +110,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (error) {
     console.error('Settings error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+      return res.status(500).json({ error: error instanceof Error ? error.message : 'Internal server error' });
   }
 }
