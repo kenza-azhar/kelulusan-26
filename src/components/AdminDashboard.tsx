@@ -540,7 +540,7 @@ function DataSiswa() {
     if (!confirm('Hapus siswa ini?')) return;
 
     const token = localStorage.getItem('token');
-      if (token === 'demo-token') {
+    if (token === 'demo-token') {
       const nextDemo = demoData.filter((student) => student.id !== id);
       const passwords = getDemoPasswords();
       const removed = demoData.find((student) => student.id === id);
@@ -570,7 +570,46 @@ function DataSiswa() {
       }
     } catch (error) {
       console.error('Failed to delete student:', error);
+      showBanner('error', 'Gagal menghapus data siswa.');
     }
+  };
+
+  const handleDeleteAll = async () => {
+    if (!confirm('Hapus semua data siswa? Tindakan ini tidak bisa dibatalkan.')) return;
+
+    const token = localStorage.getItem('token');
+    if (token === 'demo-token') {
+      setDemoData([]);
+      setStudents([]);
+      setDemoPasswords({});
+      notifyStudentsUpdated();
+      showBanner('success', 'Semua data siswa berhasil dihapus (mode demo).');
+      return;
+    }
+
+    try {
+      const { data } = await fetchJson(`${API_URL}/students?all=true`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      if (data && (data as any).success) {
+        await fetchStudents();
+        notifyStudentsUpdated();
+        showBanner('success', 'Semua data siswa berhasil dihapus.');
+      } else {
+        showBanner('error', (data as any)?.error || 'Gagal menghapus semua data siswa.');
+      }
+    } catch (error) {
+      console.error('Failed to delete all students:', error);
+      showBanner('error', 'Gagal menghapus semua data siswa.');
+    }
+  };
+
+  const handleViewAll = () => {
+    setSearch('');
+    fetchStudents();
+    showBanner('success', 'Menampilkan semua data siswa.');
   };
 
   return (
@@ -585,6 +624,12 @@ function DataSiswa() {
             onChange={handleImportFile}
             className="hidden"
           />
+          <button
+            onClick={handleViewAll}
+            className="bg-slate-100 hover:bg-slate-200 text-slate-800 px-4 py-2 rounded-lg font-medium transition"
+          >
+            Lihat Semua
+          </button>
           <button
             onClick={handleExport}
             className="bg-slate-100 hover:bg-slate-200 text-slate-800 px-4 py-2 rounded-lg font-medium transition"
@@ -608,6 +653,12 @@ function DataSiswa() {
             className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition"
           >
             Simpan
+          </button>
+          <button
+            onClick={handleDeleteAll}
+            className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-medium transition"
+          >
+            Hapus Semua
           </button>
           <button
             onClick={() => setShowForm(true)}
@@ -651,6 +702,7 @@ function DataSiswa() {
           <table className="w-full">
             <thead>
               <tr className="text-left text-sm text-slate-600 border-b">
+                <th className="p-4 w-16">No</th>
                 <th className="p-4">NISN</th>
                 <th className="p-4">Nama</th>
                 <th className="p-4">Status</th>
@@ -659,8 +711,9 @@ function DataSiswa() {
               </tr>
             </thead>
             <tbody>
-              {students.map((student) => (
+              {students.map((student, index) => (
                 <tr key={student.id} className="border-b border-slate-100 hover:bg-slate-50">
+                  <td className="p-4 font-semibold text-slate-600">{index + 1}</td>
                   <td className="p-4">{student.nisn}</td>
                   <td className="p-4">{student.nama}</td>
                   <td className="p-4">
@@ -674,7 +727,7 @@ function DataSiswa() {
                   </td>
                   <td className="p-4">
                     {student.link_pdf ? (
-                      <a href={student.link_pdf} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">
+                      <a href={student.link_pdf} target="_blank" rel="noopener noreferrer" className="theme-text hover:underline text-sm">
                         Lihat PDF
                       </a>
                     ) : (
