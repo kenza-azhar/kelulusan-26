@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
-function authenticateToken(req: VercelRequest, res: VercelResponse) {
+function authenticateToken(req: VercelRequest) {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -43,7 +43,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'POST' || req.method === 'PUT') {
-      const user = authenticateToken(req, res);
+      const user = authenticateToken(req);
       
       if (!user || (user.role !== 'Admin' && user.role !== 'Super Admin')) {
         return res.status(403).json({ error: 'Access denied. Admin only.' });
