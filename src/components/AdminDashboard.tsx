@@ -184,6 +184,7 @@ function DataSiswa() {
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Student | null>(null);
+  const [banner, setBanner] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [demoData, setDemoData] = useState<Student[]>([
     { id: 1, nisn: '1234567890', nama: 'Ahmad Siswa', status_kelulusan: 'LULUS', keterangan: 'Sangat baik', link_pdf: '' },
     { id: 2, nisn: '1234567891', nama: 'Siti Nurhaliza', status_kelulusan: 'LULUS', keterangan: 'Baik', link_pdf: '' },
@@ -203,6 +204,11 @@ function DataSiswa() {
     window.dispatchEvent(new CustomEvent('students-updated'));
   };
 
+  const showBanner = (type: 'success' | 'error', message: string) => {
+    setBanner({ type, message });
+    setTimeout(() => setBanner(null), 4000);
+  };
+
   const getDemoPasswords = () => {
     return JSON.parse(localStorage.getItem('demoStudentPasswords') || '{}') as Record<string, string>;
   };
@@ -215,11 +221,11 @@ function DataSiswa() {
     const token = localStorage.getItem('token');
     if (token === 'demo-token') {
       localStorage.setItem('demoStudents', JSON.stringify(demoData));
-      alert('Data siswa tersimpan (mode demo).');
+      showBanner('success', 'Data siswa tersimpan (mode demo).');
       return;
     }
 
-    alert('Data siswa sudah tersimpan otomatis di database.');
+    showBanner('success', 'Data siswa sudah tersimpan otomatis di database.');
   };
 
   const handleDownloadTemplate = () => {
@@ -374,7 +380,7 @@ function DataSiswa() {
 
     const token = localStorage.getItem('token');
 
-    if (token === 'demo-token') {
+      if (token === 'demo-token') {
       const newStudents = mappedRows.map((row, index) => ({
         id: Date.now() + index,
         nisn: row.nisn,
@@ -392,7 +398,7 @@ function DataSiswa() {
       setDemoData(nextDemo);
       setStudents(nextDemo);
       notifyStudentsUpdated();
-      alert(`Berhasil impor ${mappedRows.length} data siswa (mode demo).`);
+      showBanner('success', `Berhasil impor ${mappedRows.length} data siswa (mode demo).`);
       event.target.value = '';
       return;
     }
@@ -418,9 +424,9 @@ function DataSiswa() {
       notifyStudentsUpdated();
 
       if (failedCount > 0) {
-        alert(`Impor selesai. ${successCount} data berhasil disimpan, ${failedCount} gagal.`);
+        showBanner('error', `Impor selesai. ${successCount} data berhasil disimpan, ${failedCount} gagal.`);
       } else {
-        alert(`Impor selesai. ${successCount} data berhasil disimpan.`);
+        showBanner('success', `Impor selesai. ${successCount} data berhasil disimpan.`);
       }
     } catch (error) {
       console.error('Failed to import students:', error);
@@ -434,7 +440,7 @@ function DataSiswa() {
     e.preventDefault();
 
     const token = localStorage.getItem('token');
-    if (token === 'demo-token') {
+      if (token === 'demo-token') {
       let nextDemo = [...demoData];
       if (editing) {
         nextDemo = demoData.map((student) =>
@@ -463,6 +469,7 @@ function DataSiswa() {
       setDemoData(nextDemo);
       setStudents(nextDemo);
       notifyStudentsUpdated();
+      showBanner('success', editing ? 'Data siswa berhasil diperbarui (mode demo).' : 'Data siswa berhasil ditambahkan (mode demo).');
 
       setShowForm(false);
       setEditing(null);
@@ -507,6 +514,9 @@ function DataSiswa() {
         });
         await fetchStudents();
         notifyStudentsUpdated();
+        showBanner('success', editing ? 'Data siswa berhasil diperbarui.' : 'Data siswa berhasil ditambahkan.');
+      } else {
+        showBanner('error', (data as any)?.error || 'Gagal menyimpan data siswa.');
       }
     } catch (error) {
       console.error('Failed to save student:', error);
@@ -530,7 +540,7 @@ function DataSiswa() {
     if (!confirm('Hapus siswa ini?')) return;
 
     const token = localStorage.getItem('token');
-    if (token === 'demo-token') {
+      if (token === 'demo-token') {
       const nextDemo = demoData.filter((student) => student.id !== id);
       const passwords = getDemoPasswords();
       const removed = demoData.find((student) => student.id === id);
@@ -541,6 +551,7 @@ function DataSiswa() {
       setDemoData(nextDemo);
       setStudents(nextDemo);
       notifyStudentsUpdated();
+      showBanner('success', 'Data siswa berhasil dihapus (mode demo).');
       return;
     }
     
@@ -553,6 +564,9 @@ function DataSiswa() {
       if (data && (data as any).success) {
         await fetchStudents();
         notifyStudentsUpdated();
+        showBanner('success', 'Data siswa berhasil dihapus.');
+      } else {
+        showBanner('error', (data as any)?.error || 'Gagal menghapus data siswa.');
       }
     } catch (error) {
       console.error('Failed to delete student:', error);
@@ -603,6 +617,18 @@ function DataSiswa() {
           </button>
         </div>
       </div>
+
+      {banner && (
+        <div
+          className={`mb-4 rounded-lg border px-4 py-3 text-sm font-medium ${
+            banner.type === 'success'
+              ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+              : 'border-rose-200 bg-rose-50 text-rose-700'
+          }`}
+        >
+          {banner.message}
+        </div>
+      )}
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 mb-6">
         <div className="p-4 border-b border-slate-200">
@@ -786,6 +812,7 @@ function DataSiswa() {
 
 function Pengaturan() {
   const [settings, setSettings] = useState<Settings | null>(null);
+  const [banner, setBanner] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [formData, setFormData] = useState({
     nama_madrasah: '',
     tahun_ajaran: '',
@@ -796,6 +823,11 @@ function Pengaturan() {
     id_folder_drive: '',
     theme_color: '#2563eb'
   });
+
+  const showSettingsBanner = (type: 'success' | 'error', message: string) => {
+    setBanner({ type, message });
+    setTimeout(() => setBanner(null), 4000);
+  };
 
   const toLocalInputValue = (value: string) => {
     const date = new Date(value);
@@ -871,12 +903,12 @@ function Pengaturan() {
     e.preventDefault();
 
     const token = localStorage.getItem('token');
-    if (token === 'demo-token') {
+      if (token === 'demo-token') {
       setSettings({
         ...(formData as Settings),
         countdown_time: toIsoString(formData.countdown_time)
       });
-      alert('Pengaturan berhasil disimpan! (Mode demo)');
+      showSettingsBanner('success', 'Pengaturan berhasil disimpan! (Mode demo).');
       return;
     }
 
@@ -897,7 +929,9 @@ function Pengaturan() {
 
       if (data && (data as any).success) {
         setSettings((data as any).settings);
-        alert('Pengaturan berhasil disimpan!');
+        showSettingsBanner('success', 'Pengaturan berhasil disimpan!');
+      } else {
+        showSettingsBanner('error', (data as any)?.error || 'Gagal menyimpan pengaturan.');
       }
     } catch (error) {
       console.error('Failed to save settings:', error);
@@ -943,6 +977,17 @@ function Pengaturan() {
       <h1 className="text-2xl font-bold text-slate-800 mb-6">Pengaturan</h1>
       
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        {banner && (
+          <div
+            className={`mb-4 rounded-lg border px-4 py-3 text-sm font-medium ${
+              banner.type === 'success'
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                : 'border-rose-200 bg-rose-50 text-rose-700'
+            }`}
+          >
+            {banner.message}
+          </div>
+        )}
         <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
           <h2 className="text-sm font-semibold text-amber-800 mb-2">Reset Password</h2>
           <p className="text-xs text-amber-700 mb-3">
