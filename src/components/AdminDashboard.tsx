@@ -182,6 +182,10 @@ function DashboardHome() {
 function DataSiswa() {
   const [students, setStudents] = useState<Student[]>([]);
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Student | null>(null);
   const [banner, setBanner] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -280,7 +284,7 @@ function DataSiswa() {
 
   useEffect(() => {
     fetchStudents();
-  }, []);
+  }, [page, limit]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -293,22 +297,41 @@ function DataSiswa() {
     const token = localStorage.getItem('token');
 
     if (token === 'demo-token') {
-      const filtered = demoData.filter((student) => {
-        if (!search) return true;
-        const term = search.toLowerCase();
-        return student.nisn.toLowerCase().includes(term) || student.nama.toLowerCase().includes(term);
-      });
-      setStudents(filtered);
+      const filtered = demoData
+        .filter((student) => {
+          if (!search) return true;
+          const term = search.toLowerCase();
+          return student.nisn.toLowerCase().includes(term) || student.nama.toLowerCase().includes(term);
+        })
+        .sort((a, b) => a.nama.localeCompare(b.nama));
+
+      const total = filtered.length;
+      const pages = Math.max(1, Math.ceil(total / limit));
+      const safePage = Math.min(page, pages);
+      const start = (safePage - 1) * limit;
+      const paged = filtered.slice(start, start + limit);
+
+      setTotalItems(total);
+      setTotalPages(pages);
+      if (safePage !== page) {
+        setPage(safePage);
+      }
+      setStudents(paged);
       return;
     }
 
     try {
-      const { data } = await fetchJson(`${API_URL}/students?search=${search}`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
+      const { data } = await fetchJson(
+        `${API_URL}/students?search=${encodeURIComponent(search)}&page=${page}&limit=${limit}`,
+        {
+          headers: { 'Authorization': `Bearer ${token}` },
+        }
+      );
       
       if (data && (data as any).success) {
         setStudents((data as any).students);
+        setTotalItems((data as any).pagination.total);
+        setTotalPages((data as any).pagination.pages);
       }
     } catch (error) {
       console.error('Failed to fetch students:', error);
@@ -608,6 +631,7 @@ function DataSiswa() {
 
   const handleViewAll = () => {
     setSearch('');
+    setPage(1);
     fetchStudents();
     showBanner('success', 'Menampilkan semua data siswa.');
   };
@@ -688,9 +712,38 @@ function DataSiswa() {
             placeholder="Cari berdasarkan NISN atau nama..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && fetchStudents()}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                setPage(1);
+                fetchStudents();
+              }
+            }}
             className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
+            <span>Total data: <span className="font-semibold text-slate-700">{totalItems}</span></span>
+            <span>Halaman {page} dari {totalPages}</span>
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+            <span>Tampilkan per halaman:</span>
+            {[10, 20, 50].map((size) => (
+              <button
+                key={size}
+                type="button"
+                onClick={() => {
+                  setLimit(size);
+                  setPage(1);
+                }}
+                className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+                  limit === size
+                    ? 'border-slate-700 bg-slate-700 text-white'
+                    : 'border-slate-200 text-slate-600'
+                }`}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
           <p className="mt-3 text-xs text-slate-500">
             Format impor: kolom <span className="font-semibold">nisn</span>, <span className="font-semibold">nama</span>, <span className="font-semibold">password</span>, <span className="font-semibold">status_kelulusan</span>, <span className="font-semibold">keterangan</span>, <span className="font-semibold">link_pdf</span>.
           </p>
@@ -713,7 +766,7 @@ function DataSiswa() {
             <tbody>
               {students.map((student, index) => (
                 <tr key={student.id} className="border-b border-slate-100 hover:bg-slate-50">
-                  <td className="p-4 font-semibold text-slate-600">{index + 1}</td>
+                  <td className="p-4 font-semibold text-slate-600">{(page - 1) * limit + index + 1}</td>
                   <td className="p-4">{student.nisn}</td>
                   <td className="p-4">{student.nama}</td>
                   <td className="p-4">
@@ -760,6 +813,28 @@ function DataSiswa() {
               ))}
             </tbody>
           </table>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-4 py-3 text-sm text-slate-600">
+          <span>Menampilkan {students.length} dari {totalItems} siswa</span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+              disabled={page === 1}
+              className="rounded-lg border border-slate-200 px-3 py-1 text-sm font-semibold text-slate-600 disabled:opacity-50"
+            >
+              Sebelumnya
+            </button>
+            <span className="text-xs text-slate-500">Halaman {page} / {totalPages}</span>
+            <button
+              type="button"
+              onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={page >= totalPages}
+              className="rounded-lg border border-slate-200 px-3 py-1 text-sm font-semibold text-slate-600 disabled:opacity-50"
+            >
+              Berikutnya
+            </button>
+          </div>
         </div>
       </div>
 
