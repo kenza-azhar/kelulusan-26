@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import * as XLSX from 'xlsx';
+import { fetchJson } from '../utils/api';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -65,20 +66,19 @@ function DashboardHome() {
     }
 
     try {
-      const response = await fetch(`${API_URL}/students?limit=5`, {
+      const { data } = await fetchJson(`${API_URL}/students?limit=5`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       
-      const data = await response.json();
-      if (data.success) {
-        setRecentStudents(data.students);
+      if (data && (data as any).success) {
+        setRecentStudents((data as any).students);
         
-        const allStudents = await fetch(`${API_URL}/students?limit=1000`, {
+        const allResult = await fetchJson(`${API_URL}/students?limit=1000`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         
-        const allData = await allStudents.json();
-        if (allData.success) {
+        const allData = allResult.data as any;
+        if (allData?.success) {
           const total = allData.pagination.total;
           const lulus = allData.students.filter((s: Student) => s.status_kelulusan === 'LULUS').length;
           const tidakLulus = total - lulus;
@@ -251,7 +251,7 @@ function DataSiswa() {
     }
 
     try {
-      const response = await fetch(`${API_URL}/reset-passwords`, {
+      const { data } = await fetchJson(`${API_URL}/reset-passwords`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -260,11 +260,10 @@ function DataSiswa() {
         body: JSON.stringify({ target: 'student', studentId: student.id, newPassword: newPassword || undefined }),
       });
 
-      const data = await response.json();
-      if (data.success) {
-        alert(data.message || 'Password siswa berhasil direset.');
+      if (data && (data as any).success) {
+        alert((data as any).message || 'Password siswa berhasil direset.');
       } else {
-        alert(data.error || 'Gagal mereset password siswa.');
+        alert((data as any)?.error || 'Gagal mereset password siswa.');
       }
     } catch (error) {
       console.error('Failed to reset student password:', error);
@@ -297,13 +296,12 @@ function DataSiswa() {
     }
 
     try {
-      const response = await fetch(`${API_URL}/students?search=${search}`, {
+      const { data } = await fetchJson(`${API_URL}/students?search=${search}`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       
-      const data = await response.json();
-      if (data.success) {
-        setStudents(data.students);
+      if (data && (data as any).success) {
+        setStudents((data as any).students);
       }
     } catch (error) {
       console.error('Failed to fetch students:', error);
@@ -399,19 +397,20 @@ function DataSiswa() {
     }
 
     try {
-      const requests = mappedRows.map((row) =>
-        fetch(`${API_URL}/students`, {
+      const requests = mappedRows.map(async (row) => {
+        const { data } = await fetchJson(`${API_URL}/students`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(row),
-        }).then((response) => response.json())
-      );
+        });
+        return data as any;
+      });
 
       const results = await Promise.all(requests);
-      const successCount = results.filter((res) => res.success).length;
+      const successCount = results.filter((res) => res?.success).length;
       const failedCount = results.length - successCount;
 
       await fetchStudents();
@@ -485,7 +484,7 @@ function DataSiswa() {
         ? { ...formData, id: editing.id }
         : formData;
 
-      const response = await fetch(url, {
+      const { data } = await fetchJson(url, {
         method,
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -494,8 +493,7 @@ function DataSiswa() {
         body: JSON.stringify(body),
       });
 
-      const data = await response.json();
-      if (data.success) {
+      if (data && (data as any).success) {
         setShowForm(false);
         setEditing(null);
         setFormData({
@@ -546,13 +544,12 @@ function DataSiswa() {
     }
     
     try {
-      const response = await fetch(`${API_URL}/students?id=${id}`, {
+      const { data } = await fetchJson(`${API_URL}/students?id=${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
       });
 
-      const data = await response.json();
-      if (data.success) {
+      if (data && (data as any).success) {
         await fetchStudents();
         notifyStudentsUpdated();
       }
@@ -829,21 +826,21 @@ function Pengaturan() {
     }
 
     try {
-      const response = await fetch(`${API_URL}/settings`, {
+      const { data } = await fetchJson(`${API_URL}/settings`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       
-      const data = await response.json();
-      if (data.success) {
-        setSettings(data.settings);
+      if (data && (data as any).success) {
+        const settingsData = (data as any).settings;
+        setSettings(settingsData);
         setFormData({
-          nama_madrasah: data.settings.nama_madrasah,
-          tahun_ajaran: data.settings.tahun_ajaran,
-          logo_madrasah: data.settings.logo_madrasah,
-          alamat: data.settings.alamat,
-          kota: data.settings.kota,
-          countdown_time: data.settings.countdown_time.slice(0, 16),
-          id_folder_drive: data.settings.id_folder_drive || ''
+          nama_madrasah: settingsData.nama_madrasah,
+          tahun_ajaran: settingsData.tahun_ajaran,
+          logo_madrasah: settingsData.logo_madrasah,
+          alamat: settingsData.alamat,
+          kota: settingsData.kota,
+          countdown_time: settingsData.countdown_time.slice(0, 16),
+          id_folder_drive: settingsData.id_folder_drive || ''
         });
       }
     } catch (error) {
@@ -862,7 +859,7 @@ function Pengaturan() {
     }
     
     try {
-      const response = await fetch(`${API_URL}/settings`, {
+      const { data } = await fetchJson(`${API_URL}/settings`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -871,9 +868,8 @@ function Pengaturan() {
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
-      if (data.success) {
-        setSettings(data.settings);
+      if (data && (data as any).success) {
+        setSettings((data as any).settings);
         alert('Pengaturan berhasil disimpan!');
       }
     } catch (error) {
@@ -895,7 +891,7 @@ function Pengaturan() {
     }
 
     try {
-      const response = await fetch(`${API_URL}/reset-passwords`, {
+      const { data } = await fetchJson(`${API_URL}/reset-passwords`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -904,11 +900,10 @@ function Pengaturan() {
         body: JSON.stringify({ target, newPassword: newPassword || undefined }),
       });
 
-      const data = await response.json();
-      if (data.success) {
-        alert(data.message || `Password ${label} berhasil direset.`);
+      if (data && (data as any).success) {
+        alert((data as any).message || `Password ${label} berhasil direset.`);
       } else {
-        alert(data.error || 'Gagal mereset password.');
+        alert((data as any)?.error || 'Gagal mereset password.');
       }
     } catch (error) {
       console.error('Failed to reset password:', error);
