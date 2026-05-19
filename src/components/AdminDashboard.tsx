@@ -221,6 +221,57 @@ function DataSiswa() {
     alert('Data siswa sudah tersimpan otomatis di database.');
   };
 
+  const handleDownloadTemplate = () => {
+    const template = [
+      {
+        nisn: '1234567890',
+        nama: 'Nama Siswa',
+        password: 'Min1ciamis!',
+        status_kelulusan: 'LULUS',
+        keterangan: 'Contoh keterangan',
+        link_pdf: 'https://...'
+      }
+    ];
+    const worksheet = XLSX.utils.json_to_sheet(template);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Template');
+    XLSX.writeFile(workbook, 'template-data-siswa.xlsx');
+  };
+
+  const handleResetStudentPassword = async (student: Student) => {
+    const token = localStorage.getItem('token');
+    const newPassword = prompt(`Reset password untuk ${student.nama} (kosongkan = Min1ciamis!)`);
+
+    if (token === 'demo-token') {
+      const passwords = getDemoPasswords();
+      passwords[student.nisn] = newPassword?.trim() || 'Min1ciamis!';
+      setDemoPasswords(passwords);
+      alert('Password siswa berhasil direset (mode demo).');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/reset-passwords`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ target: 'student', studentId: student.id, newPassword: newPassword || undefined }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert(data.message || 'Password siswa berhasil direset.');
+      } else {
+        alert(data.error || 'Gagal mereset password siswa.');
+      }
+    } catch (error) {
+      console.error('Failed to reset student password:', error);
+      alert('Gagal mereset password siswa.');
+    }
+  };
+
   useEffect(() => {
     fetchStudents();
   }, []);
@@ -529,6 +580,12 @@ function DataSiswa() {
             Export Excel
           </button>
           <button
+            onClick={handleDownloadTemplate}
+            className="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2 rounded-lg font-medium transition"
+          >
+            Template Excel
+          </button>
+          <button
             onClick={handleImportClick}
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition"
           >
@@ -601,12 +658,18 @@ function DataSiswa() {
                     )}
                   </td>
                   <td className="p-4">
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => handleEdit(student)}
                         className="text-blue-600 hover:text-blue-800 text-sm"
                       >
                         Edit
+                      </button>
+                      <button
+                        onClick={() => handleResetStudentPassword(student)}
+                        className="text-amber-600 hover:text-amber-800 text-sm"
+                      >
+                        Reset Password
                       </button>
                       <button
                         onClick={() => handleDelete(student.id)}
