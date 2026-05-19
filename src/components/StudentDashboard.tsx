@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { fetchJson } from '../utils/api';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -59,15 +60,14 @@ export function StudentDashboard({ settings }: StudentDashboardProps) {
     }
 
     try {
-      const response = await fetch(`${API_URL}/students`, {
+      const { data } = await fetchJson(`${API_URL}/students`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
 
-      const data = await response.json();
-      if (data.success && data.students.length > 0) {
-        const student = data.students[0];
+      if (data && (data as any).success && (data as any).students.length > 0) {
+        const student = (data as any).students[0];
         setResult({
           nisn: student.nisn,
           nama: student.nama,
