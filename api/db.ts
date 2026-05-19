@@ -55,6 +55,7 @@ export async function initializeDatabase() {
         kota VARCHAR(100) NOT NULL DEFAULT 'Ciamis',
         id_folder_drive VARCHAR(255),
         countdown_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        theme_color VARCHAR(20) NOT NULL DEFAULT '#2563eb',
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
@@ -97,20 +98,31 @@ export async function initializeDatabase() {
       `;
     }
 
+    await sql`
+      ALTER TABLE settings
+      ADD COLUMN IF NOT EXISTS theme_color VARCHAR(20) NOT NULL DEFAULT '#2563eb'
+    `;
+    await sql`
+      UPDATE settings
+      SET theme_color = '#2563eb'
+      WHERE theme_color IS NULL
+    `;
+
     const settingsCount = await sql`SELECT COUNT(*) as count FROM settings`;
     if (settingsCount[0].count === 0) {
       const defaultCountdown = new Date();
       defaultCountdown.setDate(defaultCountdown.getDate() + 30);
       
       await sql`
-        INSERT INTO settings (nama_madrasah, tahun_ajaran, logo_madrasah, alamat, kota, countdown_time)
+        INSERT INTO settings (nama_madrasah, tahun_ajaran, logo_madrasah, alamat, kota, countdown_time, theme_color)
         VALUES (
           'MAN 1 Ciamis',
           '2025/2026',
           'https://upload.wikimedia.org/wikipedia/commons/8/82/Seal_of_the_Ministry_of_Religious_Affairs_of_the_Republic_of_Indonesia.svg',
           'Jl. Veteran No. 38',
           'Ciamis',
-          ${defaultCountdown.toISOString()}
+          ${defaultCountdown.toISOString()},
+          '#2563eb'
         )
       `;
     }
