@@ -96,7 +96,7 @@ export function LandingPage({ settings }: LandingPageProps) {
         <div className="w-full max-w-4xl">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-slate-800 mb-2">Pengumuman Kelulusan</h2>
-            <h3 className="text-2xl font-semibold text-blue-600 mb-1">{settings?.nama_madrasah || 'MAN 1 Ciamis'}</h3>
+            <h3 className="text-2xl font-semibold theme-text mb-1">{settings?.nama_madrasah || 'MAN 1 Ciamis'}</h3>
             <p className="text-slate-600">Tahun Ajaran {settings?.tahun_ajaran || '2025/2026'}</p>
           </div>
 
@@ -104,19 +104,19 @@ export function LandingPage({ settings }: LandingPageProps) {
             <div className="mb-8">
               <p className="text-center text-slate-600 mb-6">Akses kelulusan akan dibuka dalam:</p>
               <div className="flex justify-center gap-4">
-                <div className="bg-blue-600 text-white rounded-lg p-4 text-center min-w-20 shadow-lg">
+                <div className="theme-bg text-white rounded-lg p-4 text-center min-w-20 shadow-lg">
                   <div className="text-2xl font-bold">{timeLeft.days}</div>
                   <div className="text-xs uppercase tracking-wider">Hari</div>
                 </div>
-                <div className="bg-blue-600 text-white rounded-lg p-4 text-center min-w-20 shadow-lg">
+                <div className="theme-bg text-white rounded-lg p-4 text-center min-w-20 shadow-lg">
                   <div className="text-2xl font-bold">{String(timeLeft.hours).padStart(2, '0')}</div>
                   <div className="text-xs uppercase tracking-wider">Jam</div>
                 </div>
-                <div className="bg-blue-600 text-white rounded-lg p-4 text-center min-w-20 shadow-lg">
+                <div className="theme-bg text-white rounded-lg p-4 text-center min-w-20 shadow-lg">
                   <div className="text-2xl font-bold">{String(timeLeft.minutes).padStart(2, '0')}</div>
                   <div className="text-xs uppercase tracking-wider">Menit</div>
                 </div>
-                <div className="bg-blue-600 text-white rounded-lg p-4 text-center min-w-20 shadow-lg">
+                <div className="theme-bg text-white rounded-lg p-4 text-center min-w-20 shadow-lg">
                   <div className="text-2xl font-bold">{String(timeLeft.seconds).padStart(2, '0')}</div>
                   <div className="text-xs uppercase tracking-wider">Detik</div>
                 </div>
@@ -216,7 +216,7 @@ export function LandingPage({ settings }: LandingPageProps) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2"
+                className="w-full theme-bg theme-bg-hover disabled:bg-blue-400 text-white font-bold py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -247,7 +247,7 @@ export function LandingPage({ settings }: LandingPageProps) {
             {settings?.alamat || 'Jl. Veteran No. 38'}, {settings?.kota || 'Ciamis'}
           </p>
           <p className="text-slate-500 text-xs">
-            by <a href="https://min1ciamis.sch.id" target="_blank" rel="noopener noreferrer" className="font-semibold text-blue-600 hover:underline">Agus Arifien</a>
+            by <a href="https://min1ciamis.sch.id" target="_blank" rel="noopener noreferrer" className="font-semibold theme-text hover:underline">Agus Arifien</a>
           </p>
         </div>
       </footer>
