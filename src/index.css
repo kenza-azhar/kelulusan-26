@@ -1,1 +1,44 @@
 @import "tailwindcss";
+
+:root {
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light;
+  color: #0f172a;
+  background-color: #f8fafc;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --theme-color: #2563eb;
+  --theme-color-strong: color-mix(in srgb, var(--theme-color) 85%, #000);
+  --theme-color-soft: color-mix(in srgb, var(--theme-color) 15%, #fff);
+}
+
+.theme-bg {
+  background-color: var(--theme-color);
+}
+
+.theme-bg-strong {
+  background-color: var(--theme-color-strong);
+}
+
+.theme-bg-hover:hover {
+  background-color: var(--theme-color-strong);
+}
+
+.theme-bg-soft {
+  background-color: var(--theme-color-soft);
+}
+
+.theme-text {
+  color: var(--theme-color);
+}
+
+.theme-border {
+  border-color: var(--theme-color);
+}
+
+.theme-ring:focus {
+  --tw-ring-color: var(--theme-color);
+}
