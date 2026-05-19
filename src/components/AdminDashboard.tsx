@@ -23,6 +23,7 @@ interface Settings {
   kota: string;
   countdown_time: string;
   id_folder_drive: string;
+  theme_color?: string;
 }
 
 interface AdminDashboardProps {
@@ -792,8 +793,23 @@ function Pengaturan() {
     alamat: '',
     kota: '',
     countdown_time: '',
-    id_folder_drive: ''
+    id_folder_drive: '',
+    theme_color: '#2563eb'
   });
+
+  const toLocalInputValue = (value: string) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    const offset = date.getTimezoneOffset();
+    const local = new Date(date.getTime() - offset * 60 * 1000);
+    return local.toISOString().slice(0, 16);
+  };
+
+  const toIsoString = (value: string) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return date.toISOString();
+  };
 
   useEffect(() => {
     fetchSettings();
@@ -810,7 +826,8 @@ function Pengaturan() {
         alamat: 'Jl. Veteran No. 38',
         kota: 'Ciamis',
         countdown_time: new Date().toISOString(),
-        id_folder_drive: ''
+        id_folder_drive: '',
+        theme_color: '#2563eb'
       };
       setSettings(demoSettings as Settings);
       setFormData({
@@ -819,8 +836,9 @@ function Pengaturan() {
         logo_madrasah: demoSettings.logo_madrasah,
         alamat: demoSettings.alamat,
         kota: demoSettings.kota,
-        countdown_time: demoSettings.countdown_time.slice(0, 16),
-        id_folder_drive: ''
+        countdown_time: toLocalInputValue(demoSettings.countdown_time),
+        id_folder_drive: '',
+        theme_color: demoSettings.theme_color || '#2563eb'
       });
       return;
     }
@@ -839,8 +857,9 @@ function Pengaturan() {
           logo_madrasah: settingsData.logo_madrasah,
           alamat: settingsData.alamat,
           kota: settingsData.kota,
-          countdown_time: settingsData.countdown_time.slice(0, 16),
-          id_folder_drive: settingsData.id_folder_drive || ''
+          countdown_time: toLocalInputValue(settingsData.countdown_time),
+          id_folder_drive: settingsData.id_folder_drive || '',
+          theme_color: settingsData.theme_color || '#2563eb'
         });
       }
     } catch (error) {
@@ -853,10 +872,18 @@ function Pengaturan() {
 
     const token = localStorage.getItem('token');
     if (token === 'demo-token') {
-      setSettings(formData as Settings);
+      setSettings({
+        ...(formData as Settings),
+        countdown_time: toIsoString(formData.countdown_time)
+      });
       alert('Pengaturan berhasil disimpan! (Mode demo)');
       return;
     }
+
+    const payload = {
+      ...formData,
+      countdown_time: toIsoString(formData.countdown_time)
+    };
     
     try {
       const { data } = await fetchJson(`${API_URL}/settings`, {
@@ -865,7 +892,7 @@ function Pengaturan() {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (data && (data as any).success) {
@@ -971,6 +998,30 @@ function Pengaturan() {
               required
             />
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Warna Tema</label>
+            <div className="flex flex-wrap items-center gap-3">
+              <input
+                type="color"
+                value={formData.theme_color}
+                onChange={(e) => setFormData({ ...formData, theme_color: e.target.value })}
+                className="h-12 w-14 rounded border border-slate-300 p-1"
+              />
+              <div className="flex flex-wrap gap-2">
+                {['#2563eb', '#16a34a', '#f97316', '#be123c', '#0ea5e9', '#9333ea'].map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, theme_color: color })}
+                    className="h-9 w-9 rounded-full border border-slate-200 shadow-sm"
+                    style={{ backgroundColor: color }}
+                    aria-label={`Pilih warna ${color}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
           
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Alamat</label>
@@ -1018,7 +1069,7 @@ function Pengaturan() {
           
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition"
+            className="w-full theme-bg theme-bg-hover text-white font-medium py-2 rounded-lg transition"
           >
             Simpan Pengaturan
           </button>
